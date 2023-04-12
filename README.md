@@ -45,6 +45,7 @@ We take Figure 2 (a,b) and Figure 3 (a,b) in Main Text as the demo. For your con
 
 * Open the demo script: ./figs_demo.ipynb
 * Run the script in the created experimental environment.
+* Expected output is Figure 2 (a,b) and Figure 3 (a,b) in Main Text.
 
 The running takes less than 5 minutes on a "normal" desktop computer.
 
@@ -65,6 +66,7 @@ The running takes less than 5 minutes on a "normal" desktop computer.
 * Open the demo script: ./figs_demo.ipynb
 * Uncomment Cell 2 in the demo script.
 * Run the script.
+* Expected output is Figure 2 (a,b) and Figure 3 (a,b) in Main Text.
 
 The running takes about 6-12 hours on a "normal" desktop computer.
 
