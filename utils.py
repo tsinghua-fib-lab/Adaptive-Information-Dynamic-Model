@@ -112,8 +112,7 @@ def run(para_basic, pic=True, zip=True, mv=True, optimized=False, no_results=Fal
         simulator_tmp = simulator_optimized.simulator(**para_basic)
         print("Optimized!")
     else:
-        import simulator
-        simulator_tmp = simulator.simulator(**para_basic)
+        pass
         
     with open('./exp_record.txt', mode='r') as f:
         lines = f.readlines()

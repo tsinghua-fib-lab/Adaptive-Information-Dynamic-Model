@@ -37,11 +37,7 @@ def scores(user_vec, items_vec, phi, sim_type, method='single_user'):
         elif sim_type == 'cosine':
             user_vec = user_vec.reshape(1, -1) #(1, |T|)
             items_vec = items_vec # (N_item, |T|)
-            return cosine_similarity(user_vec, np.dot(phi, items_vec)) #(1, N_item)
-        elif sim_type == 'euclidean':
-            user_vec = user_vec.reshape(1, -1) #(1, |T|)
-            items_vec = items_vec # (N_item, |T|)
-            return 1/(1+euclidean_distances(user_vec, np.dot(phi, items_vec))) #(1, N_item)      
+            return cosine_similarity(user_vec, np.dot(phi, items_vec)) #(1, N_item)    
     elif method == 'batch_users':
         if sim_type == 'dot':
             user_vec = user_vec #(N_user, |T|)
@@ -52,11 +48,6 @@ def scores(user_vec, items_vec, phi, sim_type, method='single_user'):
             items_vec = items_vec.T # (|T|, N_item)
             item_tmp = np.dot(phi, items_vec).T
             return cosine_similarity(user_vec, item_tmp) #(N_user, N_item)
-        elif sim_type == 'euclidean':
-            user_vec = user_vec #(N_user, |T|)
-            items_vec = items_vec.T # (|T|, N_item)
-            item_tmp = np.dot(phi, items_vec).T
-            return 1/(1+euclidean_distances(user_vec, item_tmp)) #(N_user, N_item)
         elif sim_type == 'jsd': # jsd 1008
             user_vec = user_vec #(N_user, |T|)
             items_vec = items_vec.T # (|T|, N_item)
@@ -66,14 +57,6 @@ def scores(user_vec, items_vec, phi, sim_type, method='single_user'):
             jsd[np.isnan(jsd)] = 1
             reverse_jsd = 1-jsd
             return reverse_jsd
-
-
-
-
-
-
-
-
     
 def scores2recp(beta, scores, method='single_user'):
     if method == 'single_user':
@@ -98,34 +81,18 @@ def user_scores(user_vec, items_vec, sim_type, method='single_user'):
             user_vec = user_vec.reshape(1, -1) #(1, |T|)
             items_vec = items_vec # (N_item, |T|)
             score = cosine_similarity(user_vec, items_vec)
-            
-            
-        elif sim_type == 'euclidean':
-            user_vec = user_vec.reshape(1, -1) #(1, |T|)
-            items_vec = items_vec # (N_item, |T|)
-            score = 1/(1+euclidean_distances(user_vec, items_vec)) 
-        return score  #(1, N_item)
     elif method == 'batch_users':
 
         if sim_type == 'dot':
             user_vec = user_vec #(N_users, |T|)
             items_vec = items_vec # (N_users, #rec, |T|) -> (|T|, N_rec)
             score = np.vstack([np.dot(user_vec[u_idx, :], np.squeeze(items_vec[u_idx, :, :].T)) for u_idx in range(user_vec.shape[0])])
-            # print("4", score.shape)
-            #return np.dot(user_vec, items_vec)
+
         elif sim_type == 'cosine':
             user_vec = user_vec #(N_users, |T|)
             items_vec = items_vec # (N_item, #rec, |T|)
 
             score = np.vstack([cosine_similarity(user_vec[[u_idx], :], np.squeeze(items_vec[u_idx, :, :])) for u_idx in range(user_vec.shape[0])])
-            #score = cosine_similarity(user_vec, items_vec)
-            
-        elif sim_type == 'euclidean':
-            user_vec = user_vec #(N_users, |T|)
-            items_vec = items_vec # (N_item, |T|)
-            
-            score = np.vstack([1/(1+euclidean_distances(user_vec[[u_idx], :], np.squeeze(items_vec[u_idx, :, :]))) for u_idx in range(user_vec.shape[0])])
-            #score = 1/(1+euclidean_distances(user_vec, items_vec)) 
         
         elif sim_type == 'jsd': # jsd 1008
             user_vec = user_vec #(N_users, |T|)
@@ -151,11 +118,8 @@ class user:
         self.sim_type = sim_type
         
     def feedback(self, item2rec, scores2rec): 
-        int_scores = user_scores(user_vec = self.interest_int, items_vec = item2rec, sim_type=self.sim_type)
-        
-        pi =  self.alpha*scores2rec+(1-self.alpha)*int_scores
-        #print(pi)
-        #pi =  self.alpha*scores2rec/np.max(scores2rec)+(1-self.alpha)*int_scores/np.max(int_scores)
+        int_scores = user_scores(user_vec = self.interest_int, items_vec = item2rec, sim_type=self.sim_type)    
+        pi = self.alpha*scores2rec+(1-self.alpha)*int_scores
         y = np.random.rand(item2rec.shape[0])<pi
         return y
     
@@ -166,12 +130,8 @@ class users_groups:
         self.sim_type = sim_type
         
     def feedback(self, item2rec, scores2rec): 
-        #print("3", item2rec.shape)
-        int_scores = user_scores(user_vec = self.interest_int, items_vec = item2rec, sim_type=self.sim_type, method='batch_users')
-        
+        int_scores = user_scores(user_vec = self.interest_int, items_vec = item2rec, sim_type=self.sim_type, method='batch_users')       
         pi =  self.alpha*scores2rec+(1-self.alpha)*int_scores
-        #print(pi)
-        #pi =  self.alpha*scores2rec/np.max(scores2rec)+(1-self.alpha)*int_scores/np.max(int_scores)
         y = np.random.rand(item2rec.shape[0], item2rec.shape[1])<pi
         return y
 
@@ -274,7 +234,7 @@ class simulator:
         elif self.other_para['user_method'] == 'real':
             self.mu_users = np.load(self.other_para['mu_user_path'])*15
 
-        # 选择特定的topics   
+    
         elif self.other_para['user_method'] == 'real_selected':
             self.mu_users = np.load(self.other_para['mu_user_path'])*15
             
@@ -308,8 +268,7 @@ class simulator:
         
         # 优化为numpy
         if self.other_para['optimized']:
-            #print("?")
-            #print(self.other_para['optimized'])
+
             interet_int_tmp = np.vstack([u.interest_int for u in self.user_groups])
             interet_obs_tmp = np.vstack([u.interest_obs for u in self.user_groups])
             sim_type = self.sim_type
@@ -318,31 +277,26 @@ class simulator:
             self.user_groups = users_groups(alpha=alpha, interest_int=interet_int_tmp, interest_obs=interet_obs_tmp, sim_type=sim_type)
 
         if self.other_para['optimized'] > 1 :
-            #print("!")
+
             self.user_group_split(self.other_para['optimized'])
         
      
         
     def init_items(self):
-        #self.item_groups = []
-        #for i in range(self.num_items):
-        #    feature_tmp = np.random.dirichlet(alpha= self.mu_items)
-        #    self.item_groups.append(item(name=i, features = feature_tmp))
-        
-        # phi
+
         self.phi = np.load(self.phi_path)
         
-        # 选择特定的topics
+        # select topics
         if self.other_para['user_method'] == 'real_selected':
             selected_category = self.other_para['selected_category']
-            #print(selected_category)
+
             self.phi = self.phi[selected_category, :]
             self.phi = self.phi[:, selected_category]
-            #print(self.phi)
+
         # items
         tmp = np.load(self.item_path)
         
-        # 选择特定的topics
+        # select topics
         if self.other_para['user_method'] == 'real_selected':
             selected_category = self.other_para['selected_category']
             tmp = tmp[selected_category, :]
@@ -354,22 +308,16 @@ class simulator:
             feature_tmp[item_idx] = 1.0
             self.item_groups.append(item(name=i, feature = feature_tmp))
         
-        # # 优化为numpy
-        # if self.other_para['optimized']:
-
-        #     feature_tmp = np.vstack([u.feature for u in self.user_groups])
-        #     self.item_groups = {}
-        #     self.item_groups['feature'] = feature_tmp
 
     def interaction_mp(self, sub_idx):        
         user_group_tracer = []
         num_users = self.user_subgroups[sub_idx].interest_obs.shape[0]
-        # 推荐系统进行推荐
+        # recommendation
         item2rec, scores2rec = self.recsys.recommend(self.user_subgroups[sub_idx], method='batch_users')
-        #print("2", item2rec.shape)
-        # 用户进行反馈
+
+        # user feedback
         y = self.user_subgroups[sub_idx].feedback(item2rec, scores2rec) #(#users, #rec)
-        #print("5", y.shape)
+
 
         #item2rec (#users, #rec, #topic)
         topic_idx = (item2rec>0).astype('float')
@@ -378,12 +326,12 @@ class simulator:
         for i in range(num_users):
             y_pos_idx = np.where(y[i, :]==1)[0]
             y_neg_idx = np.where(y[i, :]==0)[0]
-            #print("6", y_pos_idx, y_neg_idx)
+
 
             pos_term = (self.gamma_plus*np.squeeze(np.sum(tmp[i, y_pos_idx, :], axis=0))*self.dt) if y_pos_idx.shape[0]!=0 else np.zeros_like(self.user_subgroups[sub_idx].interest_obs[0, :])
             neg_term = (self.gamma_minus*np.squeeze(np.sum(tmp[i, y_neg_idx, :], axis=0))*self.dt) if y_neg_idx.shape[0]!=0 else np.zeros_like(self.user_subgroups[sub_idx].interest_obs[0, :])
             random_term = self.sigma*np.random.normal(size = self.user_subgroups[sub_idx].interest_obs[0, :].shape[0], loc=0, scale = np.sqrt(self.dt))
-            #print("7", pos_term.shape, neg_term.shape, random_term.shape, tmp[i, y_pos_idx, :].shape)
+
             self.user_subgroups[sub_idx].interest_obs[i, :] = self.user_subgroups[sub_idx].interest_obs[i, :] + pos_term + neg_term + random_term
             user_group_tracer.append({'item2rec': np.squeeze(item2rec[i, :, :]), 'feedback': y[i, :].reshape((1,-1)), 'interest_obs': self.user_subgroups[sub_idx].interest_obs[i, :]})
         self.user_subgroups[sub_idx].interest_obs = np.clip(self.user_subgroups[sub_idx].interest_obs, 0, 1)
@@ -411,14 +359,13 @@ class simulator:
         if not self.other_para['optimized']:
             user_group_tracer = []
             for u in self.user_groups:
-                # 推荐系统进行推荐
+                # recommendation
                 item2rec, scores2rec = self.recsys.recommend(u)
-                # 用户进行反馈
+                # user feedback
                 y = u.feedback(item2rec, scores2rec)
                 y_pos_idx = np.where(y==1)[1]
                 y_neg_idx = np.where(y==0)[1]
-                #print(y_pos_idx, y_neg_idx)
-                # 更新用户向量
+                # update
                 topic_idx = (item2rec>0).astype('float')
                 tmp = (item2rec - u.interest_obs) * topic_idx
 
@@ -452,25 +399,21 @@ class simulator:
         elif self.other_para['optimized']:
             user_group_tracer = []
 
-            # 推荐系统进行推荐
+            # recommendation
             item2rec, scores2rec = self.recsys.recommend(self.user_groups, method='batch_users')
-            #print("2", item2rec.shape)
-            # 用户进行反馈
+            # user feeback
             y = self.user_groups.feedback(item2rec, scores2rec) #(#users, #rec)
-            #print("5", y.shape)
-
             #item2rec (#users, #rec, #topic)
             topic_idx = (item2rec>0).astype('float')
             tmp = (item2rec - self.user_groups.interest_obs[:, np.newaxis, :]) * topic_idx
             for i in range(self.num_users):
                 y_pos_idx = np.where(y[i, :]==1)[0]
                 y_neg_idx = np.where(y[i, :]==0)[0]
-                #print("6", y_pos_idx, y_neg_idx)
 
                 pos_term = (self.gamma_plus*np.squeeze(np.sum(tmp[i, y_pos_idx, :], axis=0))*self.dt) if y_pos_idx.shape[0]!=0 else np.zeros_like(self.user_groups.interest_obs[0, :])
                 neg_term = (self.gamma_minus*np.squeeze(np.sum(tmp[i, y_neg_idx, :], axis=0))*self.dt) if y_neg_idx.shape[0]!=0 else np.zeros_like(self.user_groups.interest_obs[0, :])
                 random_term = self.sigma*np.random.normal(size = self.user_groups.interest_obs[0, :].shape[0], loc=0, scale = np.sqrt(self.dt))
-                #print("7", pos_term.shape, neg_term.shape, random_term.shape, tmp[i, y_pos_idx, :].shape)
+
                 self.user_groups.interest_obs[i, :] = self.user_groups.interest_obs[i, :] + pos_term + neg_term + random_term
                 
                 self.user_groups.interest_obs[i, :] = np.clip(self.user_groups.interest_obs[i, :], 0, 1)
@@ -478,8 +421,6 @@ class simulator:
 
                 user_group_tracer.append({'item2rec': np.squeeze(item2rec[i, :, :]), 'feedback': y[i, :].reshape((1,-1)), 'interest_obs': self.user_groups.interest_obs[i, :]})
         
-            #self.user_groups.interest_obs = np.clip(self.user_groups.interest_obs, 0, 1)
-            #self.user_groups.interest_obs = self.user_groups.interest_obs/np.sum(self.user_groups.interest_obs, axis=1, keepdims=True)
 
             self.tracer(user_group_tracer = user_group_tracer)
 
