@@ -37,7 +37,7 @@ jupyter notebook == 6.4.8
 
 The installation takes less than 10 minutes under good network conditions.
 
-## Option: From Docker Image (Update@20230609)
+### Option: From Docker Image (Update@20230609)
 
 * Install [Docker](https://docs.docker.com/install/)
 * Download the Docker Image: [Image](https://drive.google.com/drive/folders/1Kq3ha3FKKsuqgYHdpr2KY9gYCJ8onHQ0?usp=sharing)
