@@ -79,6 +79,9 @@ The running takes less than 5 minutes on a "normal" desktop computer.
     jupyter notebook --ip 0.0.0.0 --no-browser --allow-root --port 8844
     ```
 * Copy the link like http://127.0.0.1:8844/?token=2a22165cd3917ad2f925b76c7d643688b493e48b88a03333 in your browse. 
+* Open the demo script: ./figs_demo.ipynb
+* Run the script in the created experimental environment.
+* Expected output is Figure 2 (a,b) and Figure 3 (a,b) in Main Text.
 
 
 **(2) We also provide the code to reproduce the simulated data which have been used in the demo. The usage is listed as follows:**
