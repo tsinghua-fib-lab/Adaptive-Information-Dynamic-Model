@@ -4,6 +4,8 @@ Thank you for reviewing our manuscript "Human-AI Adaptive Dynamics Drive Emergen
 
 The repository contains the source code and the simulated dataset. The source code is implemented in Python.
 
+**Update@20230609**: In response to the Reviewer's valuable suggestion, we add a Docker image to the repository. 
+
 ---
 
 ## System requirements
@@ -35,6 +37,21 @@ jupyter notebook == 6.4.8
 
 The installation takes less than 10 minutes under good network conditions.
 
+## Option: From Docker Image (Update@20230609)
+
+* Install [Docker](https://docs.docker.com/install/)
+* Download the Docker Image: [Image](https://drive.google.com/drive/folders/1Kq3ha3FKKsuqgYHdpr2KY9gYCJ8onHQ0?usp=sharing)
+* Import the Docker Image:
+    ```shell
+    docker import - new_exp<exp_environment.tar
+    ```
+* Run the Docker Image:
+    ```shell
+    docker run -t -i -p 8844:8844 new_exp /bin/bash
+    ```
+
+Indeed, as the novice of Docker, we follow the base image created by [continuumio](https://hub.docker.com/r/continuumio/anaconda3). We would like to thank the overall community for the support. If there are any issues regarding the enviroment, please feel free to contact us.
+
 ---
 
 ## Demo and Reproduction
@@ -48,6 +65,21 @@ We take Figure 2 (a,b) and Figure 3 (a,b) in Main Text as the demo. For your con
 * Expected output is Figure 2 (a,b) and Figure 3 (a,b) in Main Text.
 
 The running takes less than 5 minutes on a "normal" desktop computer.
+
+### Option: Docker (Update@20230609)
+
+* Activate the environment and enter the folder.
+    ```shell
+    conda activate exp
+    cd ./NMI-submissions
+    ```
+
+* Start a Jupyter Notebook.
+    ```shell
+    jupyter notebook --ip 0.0.0.0 --no-browser --allow-root --port 8844
+    ```
+* Copy the link like http://127.0.0.1:8844/?token=2a22165cd3917ad2f925b76c7d643688b493e48b88a03333 in your browse. 
+
 
 **(2) We also provide the code to reproduce the simulated data which have been used in the demo. The usage is listed as follows:**
 
@@ -107,6 +139,8 @@ Note that reproducing all the results requires large computing resources. Theref
     * run_SI_news.py: a script for reproducing simulation results of the news dataset.
     * simulator_optimized.py: base codes of simulation.
     * utils.py: functions for simulation.
+* Docker Image: https://drive.google.com/drive/folders/1Kq3ha3FKKsuqgYHdpr2KY9gYCJ8onHQ0?usp=sharing
+
 
 
 
