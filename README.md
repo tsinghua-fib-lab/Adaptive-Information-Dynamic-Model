@@ -152,6 +152,7 @@ Note that reproducing all the results requires large computing resources. Theref
     * fig_demo: data prepared for demo
     * raw_data: two raw datasets. Note that following the "less than 30M" instructions, we seperate the video dataset into two partitions. 
     * processed_data: preprocessed empirical data using the script "preprocessing.py".
+    * source_data: the source data for Figs. 1-4 in the manuscript.
 
 * Scripts
     * demo_utils.py: functions for demo
